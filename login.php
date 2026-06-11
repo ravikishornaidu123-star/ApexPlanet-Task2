@@ -1,82 +1,46 @@
 <?php
-require_once 'includes/auth.php';
-require_once 'includes/db.php';
-
-if (isLoggedIn()) {
-    header('Location: index.php');
-    exit();
-}
-
+require 'db.php';
+session_start();
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-    if ($username === '' || $password === '') {
-        $error = 'Please fill in all fields.';
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+
+    if ($user && password_verify($password, $user['password'])) {
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        header('Location: index.php');
+        exit;
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = :username LIMIT 1");
-        $stmt->execute([':username' => $username]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id']  = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role']     = $user['role'];
-            header('Location: index.php');
-            exit();
-        } else {
-            $error = 'Invalid username or password.';
-        }
+        $error = "Invalid email or password!";
     }
 }
 ?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login – ApexBlog</title>
-<link rel="stylesheet" href="css/style.css">
+    <title>Login</title>
+    <style>
+        body { font-family: Arial; max-width: 400px; margin: 50px auto; }
+        input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #008CBA; color: white; border: none; cursor: pointer; }
+        .error { color: red; }
+    </style>
 </head>
 <body>
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <div class="auth-logo">
-            <h1>🌐 ApexBlog</h1>
-            <p>Sign in to continue</p>
-        </div>
-
-        <?php if ($error): ?>
-        <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-
-        <form method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username"
-                       value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                       placeholder="Enter username" required autofocus>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password"
-                       placeholder="Enter password" required>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:.7rem">
-                🔐 Login
-            </button>
-        </form>
-
-        <div class="auth-switch">
-            Don't have an account? <a href="register.php">Register here</a>
-        </div>
-
-        <div style="margin-top:1rem;padding:.7rem;background:#f4f6f7;border-radius:7px;font-size:.82rem;color:#7f8c8d;text-align:center">
-            Demo: <strong>admin</strong> / <strong>admin123</strong>
-        </div>
-    </div>
-</div>
+    <h2>Login</h2>
+    <?php if($error) echo "<p class='error'>$error</p>"; ?>
+    <form method="POST">
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="register.php">Register</a></p>
 </body>
 </html>
