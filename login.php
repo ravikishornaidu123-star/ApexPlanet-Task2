@@ -26,21 +26,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html>
 <head>
     <title>Login</title>
-    <style>
-        body { font-family: Arial; max-width: 400px; margin: 50px auto; }
-        input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #008CBA; color: white; border: none; cursor: pointer; }
-        .error { color: red; }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h2>Login</h2>
-    <?php if($error) echo "<p class='error'>$error</p>"; ?>
-    <form method="POST">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="register.php">Register</a></p>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <h3 class="text-center mb-4">🔐 Login</h3>
+                    <?php if($error) echo "<div class='alert alert-danger'>$error</div>"; ?>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                    <p class="text-center mt-3">Don't have an account? <a href="register.php">Register</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
